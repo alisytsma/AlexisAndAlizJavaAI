@@ -25,7 +25,6 @@ package javaai.ann.learn.meta.ga;
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
 import org.encog.ml.genetic.genome.IntegerArrayGenome;
-
 import java.util.Random;
 
 import static javaai.util.Helper.asInt;
@@ -41,6 +40,10 @@ class XorObjective implements CalculateScore {
     public final static double RANGE_MAX = 10.0;
     public final static double RANGE_MIN = -10.0;
     protected static Random ran = null;
+    public final static double[][] XOR_INPUTS = {{0,0},{0,1},{1,0},{1,1}};
+    public final static double[][] XOR_IDEALS = {{0},{1},{1},{0}};
+
+
     static {
         long seed = System.nanoTime();
         if(DEBUGGING)
@@ -57,10 +60,21 @@ class XorObjective implements CalculateScore {
 
         System.out.println(TEAM);
         for(int k=0; k < ws.length - 2; k++)
-            System.out.printf("%5s %3.5f \n", ("ws" + (k + 1)) + ": ", ws[k]);
+            System.out.printf("%5s %3.5f \n", ("w" + (k + 1)) + ": ", ws[k]);
         System.out.printf("%5s %3.5f \n", "b1: ", ws[6]);
         System.out.printf("%5s %3.5f \n", "b2: ", ws[7]);
 
+        XorObjective objective = new XorObjective();
+
+        System.out.printf("%3s %6s %6s %6s %6s \n", "#", "x1", "x2","t1","y1");
+
+        for(int i = 0; i < XOR_INPUTS.length; i++){
+            double y1 = objective.feedforward(XOR_INPUTS[i][0], XOR_INPUTS[i][1], ws);
+            System.out.printf("%3d %1.4f %1.4f %1.4f %1.4f \n", i, XOR_INPUTS[i][0], XOR_INPUTS[i][1], XOR_IDEALS[i][0], y1);
+        }
+
+        double fitness = objective.getFitness(ws);
+        System.out.println("Fitness: " + fitness);
 
     }
     /**
@@ -106,9 +120,67 @@ class XorObjective implements CalculateScore {
         return (x - 3)*(x - 3);
     }
 
+    /**
+     * Returns a random weight.
+     * @return double
+     */
     public static double getRandomWeight() {
         double wt = ran.nextDouble()*(RANGE_MAX-RANGE_MIN)+RANGE_MIN;
         return wt;
     }
+
+    /**
+     * Returns the activated feedforward calculation.
+     * @param x double
+     * @return double
+     */
+    protected double sigmoid(double x){
+        return 1.0 / (1 + Math.exp(-(x)));
+    }
+
+    /**
+     * Calculates the ANN output.
+     * @param x1 double
+     * @param x2 double
+     * @param ws double[]
+     * @return double
+     */
+    protected double feedforward(double x1, double x2, double[] ws){
+
+        double w1 = ws[0];
+        double w2 = ws[1];
+        double w3 = ws[2];
+        double w4 = ws[3];
+        double w5 = ws[4];
+        double w6 = ws[5];
+        double b1 = ws[6];
+        double b2 = ws[7];
+
+        double h1 = sigmoid(w1*x1 + w3*x2 + b1*1);
+        double h2 = sigmoid(w2*x1 + w4*x2 + b1*1);
+        double y1 = sigmoid(h1*w5 + h2*w6 + b2*1);
+
+        return y1;
+
+    }
+
+    /**
+     * Calculates the fitness.
+     * @param ws double[]
+     * @return double
+     */
+    public double getFitness(double[] ws) {
+        double sumSqrErr = 0;
+        double sqrErr = 0;
+        for(int i = 0; i < XOR_INPUTS.length; i++){
+            double y1 = feedforward(XOR_INPUTS[i][0], XOR_INPUTS[i][1], ws);
+            sqrErr = (y1 - XOR_IDEALS[i][0]) * (y1 - XOR_IDEALS[i][0]);
+        }
+
+        sumSqrErr += sqrErr;
+        double rmse = Math.sqrt(sumSqrErr / XOR_INPUTS.length);
+        return rmse;
+    }
+
 
 }
