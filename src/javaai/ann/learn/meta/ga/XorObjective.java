@@ -24,6 +24,7 @@ package javaai.ann.learn.meta.ga;
 
 import org.encog.ml.CalculateScore;
 import org.encog.ml.MLMethod;
+import org.encog.ml.genetic.genome.DoubleArrayGenome;
 import org.encog.ml.genetic.genome.IntegerArrayGenome;
 import java.util.Random;
 
@@ -84,13 +85,12 @@ class XorObjective implements CalculateScore {
      */
     @Override
     public double calculateScore(MLMethod phenotype) {
-        IntegerArrayGenome genome = (IntegerArrayGenome) phenotype;
+        DoubleArrayGenome genome = (DoubleArrayGenome) phenotype;
 
-        int x = asInt(genome);
+        double[] ws = genome.getData();
+        double fitness = getFitness(ws);
 
-        double y = f(x);
-
-        return y;
+        return fitness;
     }
 
     /**

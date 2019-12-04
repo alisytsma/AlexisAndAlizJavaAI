@@ -417,7 +417,7 @@ public class Helper {
         double[] ws = genome.getData();
 
         for(double w: ws)
-            s += String.format("%4.2f", w) + " ";
+            s += String.format("%7.3f", w) + " ";
 
         return s;
     }
