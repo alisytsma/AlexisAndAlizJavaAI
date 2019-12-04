@@ -173,11 +173,14 @@ class XorObjective implements CalculateScore {
         double sumSqrErr = 0;
         double sqrErr = 0;
         for(int i = 0; i < XOR_INPUTS.length; i++){
-            double y1 = feedforward(XOR_INPUTS[i][0], XOR_INPUTS[i][1], ws);
-            sqrErr = (y1 - XOR_IDEALS[i][0]) * (y1 - XOR_IDEALS[i][0]);
+            double x1 = XOR_INPUTS[i][0];
+            double x2 = XOR_INPUTS[i][1];
+            double y1 = feedforward(x1, x2, ws);
+            double t1 = XOR_IDEALS[i][0];
+            sqrErr = (y1 - t1) * (y1 - t1);
+            sumSqrErr += sqrErr;
         }
 
-        sumSqrErr += sqrErr;
         double rmse = Math.sqrt(sumSqrErr / XOR_INPUTS.length);
         return rmse;
     }
